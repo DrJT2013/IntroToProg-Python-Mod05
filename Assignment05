@@ -1,0 +1,145 @@
+# ------------------------------------------------------------------------------------------ #
+# Title: Assignment05
+# Desc: This assignment demonstrates using dictionaries, files, and exception handling
+# Change Log: (Who, When, What)
+#   RRoot,1/1/2030,Created Script
+#   Julianne Tillmann, 11/14/2024, Added the use of json, data processing using dictionaries
+#   and exception handling.
+# ------------------------------------------------------------------------------------------ #
+
+# Adding the ability to work with json files.
+import json
+
+# Define the Data Constants
+MENU: str = '''
+---- Course Registration Program ----
+  Select from the following menu:  
+    1. Register a Student for a Course.
+    2. Show current data.  
+    3. Save data to a file.
+    4. Exit the program.
+----------------------------------------- 
+'''
+
+# Define the Data Constants to use the json file.
+FILE_NAME: str = "Enrollments.json"
+
+# Define the Data Variables and constants
+student_first_name: str = ''  # Holds the first name of a student entered by the user.
+student_last_name: str = ''  # Holds the last name of a student entered by the user.
+course_name: str = ''  # Holds the name of a course entered by the user.
+student_data: dict = {}  # one row of student data
+students: list = []  # a table of student data
+json_data: str = ''  # Holds combined string data separated by a comma.
+file = None  # Holds a reference to an opened file.
+menu_choice: str  # Hold the choice made by the user.
+
+
+# When the program starts, read the file data into a list of lists (table)
+# Extract the data from the file
+try:
+    file = open(FILE_NAME, "r") #reads the file
+    students = json.load(file) #loads data into the students table
+    print("Loaded data includes:", students) #shows loaded data to check for potential erorrs
+    file.close()
+except FileNotFoundError as e:
+    print(f"{FILE_NAME} was not found. A new file will be created.")
+    file = open(FILE_NAME, 'w') # Creates a new file
+except Exception as e:
+    print("There was an error opening the file.")
+    print(e, e._doc_) #Shows the detailed system error info
+finally:
+    if not file.closed:
+        file.close()
+        
+#for row in file.readlines():
+#    # Transform the data from the file
+#    student_data = row.split(',')
+#    student_data = [student_data[0], student_data[1], student_data[2].strip()]
+#    # Load it into our collection (list of lists)
+#    students.append(student_data)
+#file.close()
+
+# Present and Process the data
+while (True):
+
+    # Present the menu of choices
+    print(MENU)
+    menu_choice = input("What would you like to do: ")
+
+    # Input user data
+    if menu_choice == "1":  # This will not work if it is an integer!
+        try:
+            student_first_name = input("Enter the student's first name: ")
+            if not student_first_name.isalnum():
+                raise ValueError("Student's first name must be alphanumeric. Spaces are not allowed.")
+
+            student_last_name = input("Enter the student's last name: ")
+            if not student_last_name.isalnum():
+                raise ValueError("Student's last name must be alphanumeric. Spaces are not allowed.")
+
+            course_name = input("Please enter the name of the course: ")
+            # Course names are allowed to have non-alphanumeric characters.
+            # Hence, error checking was not used here.
+
+            student_data = {
+               "FirstName": student_first_name,
+               "LastName": student_last_name,
+               "CourseName": course_name
+            }
+            students.append(student_data)
+            print((
+                f"You have registered {student_data['FirstName']} "
+                f"{student_data['LastName']} for {student_data['CourseName']}."
+                ))
+            continue
+        except ValueError as e:
+            print("\nInvalid entry. Please try again.")
+            print(e, e._doc_)
+            continue
+
+    # Present the current data
+    elif menu_choice == "2":
+
+        # Process the data to create and display a custom message
+        try:
+            print("-" * 50) #50 can be changed if more space is available or needed
+            for student in students:
+                print((
+                    f"{student['FirstName']} {student['LastName']} "
+                    f"{student['CourseName']}"
+                    ))
+                continue
+        except KeyError as e: # added error check, especially with pre-existing files
+            print(f"Missing or incorrect data in student record: {e}")
+            continue
+            print("-" * 50)
+        continue
+
+    # Save the data to a file
+    elif menu_choice == "3":
+        try:
+            file = open(FILE_NAME, "w")
+            json.dump(students, file)
+            file.close()
+            print("The following data was saved to file!")
+            for student in students:
+                print((
+                    f"{student['FirstName']} {student['LastName']} "
+                    f"{student['CourseName']}."
+                    ))
+
+        except Exception as e:
+            print(f"There was an error saving data to {FILE_NAME}.")
+            print(e, e._doc_)
+        continue
+
+
+
+    # Stop the loop
+    elif menu_choice == "4":
+        break  # out of the loop
+    else:
+        print("Please only choose option 1, 2, or 3")
+
+print("Program Ended")
