@@ -70,68 +70,76 @@ while (True):
     # Input user data
     if menu_choice == "1":  # This will not work if it is an integer!
         try:
-            student_first_name = input("Enter the student's first name: ")
+            #Input and validation for the first and last name, including removing extra spaces with strip.
+            student_first_name = input("Enter the student's first name: ").strip()
             if not student_first_name.isalnum():
                 raise ValueError("Student's first name must be alphanumeric. Spaces are not allowed.")
-
-            student_last_name = input("Enter the student's last name: ")
+                
+            student_last_name = input("Enter the student's last name: ").strip()
             if not student_last_name.isalnum():
                 raise ValueError("Student's last name must be alphanumeric. Spaces are not allowed.")
 
+            #Input and validation for the course name.
+            #The course name can include non alphanumeric characters, but it cannot be empty.
             course_name = input("Please enter the name of the course: ")
-            # Course names are allowed to have non-alphanumeric characters.
-            # Hence, error checking was not used here.
+            if not course_name: #if it's blank
+                raise ValueError("Course name cannot be empty.")
 
+            #Storing student data as a dictionary.
             student_data = {
                "FirstName": student_first_name,
                "LastName": student_last_name,
                "CourseName": course_name
             }
             students.append(student_data)
+
+            #Confirmation message.
             print((
                 f"You have registered {student_data['FirstName']} "
                 f"{student_data['LastName']} for {student_data['CourseName']}."
                 ))
             continue
+        
         except ValueError as e:
-            print("\nInvalid entry. Please try again.")
-            print(e, e._doc_)
+            print(f"\nError: {e} Please try again.")
             continue
 
     # Present the current data
     elif menu_choice == "2":
 
+        print("-" * 50) #Separator for output.
         # Process the data to create and display a custom message
-        try:
-            print("-" * 50) #50 can be changed if more space is available or needed
-            for student in students:
+        for student in students:
+            try:
                 print((
                     f"{student['FirstName']} {student['LastName']} "
                     f"{student['CourseName']}"
                     ))
-                continue
-        except KeyError as e: # added error check, especially with pre-existing files
-            print(f"Missing or incorrect data in student record: {e}")
-            continue
-            print("-" * 50)
+            # An error check, especially with pre-existing files, indicating where the erorr is.
+            except KeyError as e: 
+                print(f"Missing or incorrect data in student record: {e}. Record: {student}")
+        print("-" * 50) #Closing separator
         continue
 
     # Save the data to a file
     elif menu_choice == "3":
         try:
-            file = open(FILE_NAME, "w")
-            json.dump(students, file)
-            file.close()
-            print("The following data was saved to file!")
+            # Using "with open" instead of "file = open" is better for file handling.
+            # This eliminates the need for "file.close()"
+            with open(FILE_NAME, "w") as file:
+                json.dump(students, file)
+
+            #Confirmation message
+            print("The following data was saved to file:")
             for student in students:
                 print((
                     f"{student['FirstName']} {student['LastName']} "
                     f"{student['CourseName']}."
                     ))
 
+        # Adding error handling.
         except Exception as e:
-            print(f"There was an error saving data to {FILE_NAME}.")
-            print(e, e._doc_)
+            print(f"There was an error saving data to {FILE_NAME}: {e}.")
         continue
 
 
